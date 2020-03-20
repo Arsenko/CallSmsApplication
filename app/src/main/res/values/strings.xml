@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">CallSmsApplication</string>
+    <string name="Calling">Звоним</string>
+    <string name="Sending">Отправляем</string>
+    <string name="hintPhone">Введите номер телефона</string>
+    <string name="hintText">Введите текст сообщения</string>
+    <string name="permissionDeniedCall">Отсутствуют привелегии на совершение звонков</string>
+    <string name="permissionDeniedSend">Отсутствуют привелегии на отправку сообщений</string>
+</resources>
