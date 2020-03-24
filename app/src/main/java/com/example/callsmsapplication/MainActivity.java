@@ -22,6 +22,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        request();
         init();
     }
 
@@ -35,39 +36,71 @@ public class MainActivity extends AppCompatActivity {
         btnCall.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.CALL_PHONE)!= PackageManager.PERMISSION_GRANTED){
-                    ActivityCompat.requestPermissions(MainActivity.this,new String[]{Manifest.permission.CALL_PHONE},1);
                     if(ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.CALL_PHONE)==PackageManager.PERMISSION_GRANTED){
                         Intent intent = new Intent(Intent.ACTION_CALL);
-                        intent.setData(Uri.parse(phoneNumber.getText().toString()));
-                        startActivity(intent);
+                        String tempNumber=phoneNumber.getText().toString();
+                        if(checkNumber(tempNumber)) {
+                            intent.setData(Uri.parse("tel:"+tempNumber));
+                            startActivity(intent);
+                        }
                     }else{
                         Toast.makeText(MainActivity.this,getString(R.string.permissionDeniedCall),Toast.LENGTH_LONG).show();
-                    };
-                }else {
-                    Intent intent = new Intent(Intent.ACTION_CALL);
-                    intent.setData(Uri.parse("tel:"+phoneNumber.getText().toString()));
-                    startActivity(intent);
-                }
+                        requestCall();
+                    }
             }
         });
 
         btnSend.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.SEND_SMS)!= PackageManager.PERMISSION_GRANTED){
-                    ActivityCompat.requestPermissions(MainActivity.this,new String[]{Manifest.permission.SEND_SMS},1);
-                    if(ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.SEND_SMS)==PackageManager.PERMISSION_GRANTED){
-                        SmsManager smsmnrg=SmsManager.getDefault();
-                        smsmnrg.sendTextMessage(phoneNumber.getText().toString(),null,smsText.getText().toString(),null,null);
-                    }else{
+                if(ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.SEND_SMS)==PackageManager.PERMISSION_GRANTED){
+                    SmsManager smsmsnrg=SmsManager.getDefault();
+                    String tempNumber=phoneNumber.getText().toString();
+                    if(checkNumber(tempNumber)) {
+                        smsmsnrg.sendTextMessage(tempNumber, null, smsText.getText().toString(), null, null);
+                    }
+                }else{
                         Toast.makeText(MainActivity.this,getString(R.string.permissionDeniedSend),Toast.LENGTH_LONG).show();
-                    };
-                }else {
-                    SmsManager smsmnrg=SmsManager.getDefault();
-                    smsmnrg.sendTextMessage(phoneNumber.getText().toString(),null,smsText.getText().toString(),null,null);
+                        requestSend();
                 }
             }
         });
+    }
+
+    private void request(){
+        requestCall();
+        requestSend();
+    }
+
+    private void requestSend(){
+        if(ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.SEND_SMS)!= PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.SEND_SMS}, 1);
+        }
+    }
+
+    private void requestCall(){
+        if(ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.CALL_PHONE)!= PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.CALL_PHONE}, 1);
+        }
+    }
+
+    private boolean checkNumber(String phoneNumber){
+        char[] tempString=phoneNumber.toCharArray();
+        if(tempString.length<11 || tempString.length>13){
+            Toast.makeText(getApplicationContext(),getString(R.string.numberLengthError),Toast.LENGTH_LONG).show();
+            return false;
+        }else{
+            boolean flag=true;
+            for(int i=0;i<tempString.length;i++){
+                if(!(Character.isDigit(tempString[i])) || !(tempString[i]=='+')){
+                    flag=false;
+                }
+                if(flag){
+                    Toast.makeText(getApplicationContext(),getString(R.string.numberFormatError),Toast.LENGTH_LONG).show();
+                    return false;
+                }
+            }
+            return true;
+        }
     }
 }
